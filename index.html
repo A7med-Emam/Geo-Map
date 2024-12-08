@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mecca Landmarks</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css">
+    <style>
+        .Header {
+            border: dashed 4px #000;         /* لون الخط */
+            font-family: calibri;              /* نوع الخط */
+            text-align: center;               /* محاذاة النص */
+            line-height: 0.5;                /* المسافة بين السطور */
+            background-image: url('حجاج.jpeg');  /* صورة الخلفية */
+            background-size: cover;        /* لتغطية الخلفية بالكامل */
+            background-repeat: no-repeat;     /* لمنع تكرار الصورة */
+            background-position: center;   /* لجعل الصورة في المنتصف */
+            position: relative;       /* لإضافة طبقة شفافة فوق الصورة */
+        }
+
+        .Header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);  /* لون خلفية داكن مع شفافية 50% */
+            z-index: 1;               /* لضمان أن تكون الطبقة فوق الصورة */
+        }
+
+        .Header h1, .Header h2 {
+            position: relative; /* لجعل النص فوق الطبقة الشفافة */
+            z-index: 2; /* لضمان أن يكون النص فوق الطبقة */
+        }
+
+        .Header h1 {
+            color: #c0bd0a;
+            background-color: transparent; /* لجعل الخلفية شفافة */
+        }
+
+        .Header h2 {
+            color: rgb(71, 194, 55);
+        }
+
+        .Header h2 span {
+            color: aliceblue;
+            background-color: rgba(5, 129, 1, 0.685);
+        }
+
+        .Map_Title {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .Map_Frame {
+            width: 100%; /* عرض الإطار بالكامل */
+            height: 600px; /* ارتفاع الإطار */
+            border: 4px solid #000; /* حدود الإطار */
+            margin-top: 20px; /* مسافة بين العنوان والإطار */
+            position: relative; /* لجعل الإطار يحتوي على الخريطة */
+        }
+
+        /* تأكد من أن الخريطة تأخذ كامل حجم الإطار */
+        #mapDiv {
+            width: 100%; /* عرض الخريطة بالكامل */
+            height: 100%; /* ارتفاع الخريطة بالكامل */
+            position: absolute; /* لجعل الخريطة تأخذ كامل الإطار */
+            top: 0; /* محاذاة من الأعلى */
+            left: 0; /* محاذاة من اليسار */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="Header">  
+        <h1>المملكة العربية السعودية</h1>
+        <h2>هيئة تطوير منطقة مكة المكرمة</h2>
+        <h2>الإدارة العامة للتشغيل والصيانة</h2>
+        <h2><span>مشروع التسمية والترقيم والإرشاد بالمشاعر المقدسة</span></h2>
+    </div>
+
+    <div class="Map_Title"> 
+        <h3>الخريطة الإرشادية العامة للمشاعر المقدسة</h3>
+    </div>
+
+    <div class="Map_Frame">
+        <div id="mapDiv"></div> <!-- تأكد من وجود div الخاص بالخريطة هنا -->
+    </div>
+
+    <script src="https://js.arcgis.com/4.23/"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/TileLayer",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/Legend",
+            "esri/widgets/ScaleBar",
+            "esri/widgets/Compass"
+        ], function(Map, MapView, TileLayer, FeatureLayer, Legend, ScaleBar, Compass) {
+            // إنشاء الخريطة
+            var map = new Map({
+                basemap: "satellite" // استخدم الاسم هنا مثل "streets", "satellite", "topo", إلخ.
+            });
+
+            // إعداد العرض
+            var view = new MapView({
+                container: "mapDiv", // العنصر الذي سيتم عرض الخريطة فيه
+                map: map,
+                center: [39.8262, 21.4225], // إحداثيات مكة المكرمة
+                zoom: 10, // مستوى التكبير
+                constraints: {
+                    rotationEnabled: false // إيقاف دوران الخريطة
+                }
+            });
+
+            // إضافة طبقة خريطة
+            var tileLayer = new TileLayer({
+                url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer"
+            });
+            map.add(tileLayer);
+
+            // إضافة Feature Layer الأولى
+            var featureLayer1 = new FeatureLayer({
+                url: "https://services.arcgis.com/TjX6IfnuVhd3tdsR/arcgis/rest/services/Makkah_Sectors/FeatureServer"
+            });
+            map.add(featureLayer1);
+
+            // إضافة Feature Layer الثانية
+            var featureLayer2 = new FeatureLayer({
+                url: "https://services.arcgis.com/TjX6IfnuVhd3tdsR/arcgis/rest/services/Makkah_Districts/FeatureServer"
+            });
+            map.add(featureLayer2);
+
+            // إضافة مفتاح الخريطة
+            var legend = new Legend({
+                view: view,
+                container: document.createElement("div")
+            });
+            view.ui.add(legend, "bottom-right"); // إضافة المفتاح في الزاوية السفلى اليمنى
+
+            // إضافة مقياس الرسم
+            var scaleBar = new ScaleBar({
+                view: view,
+                unit: "metric" // يمكنك استخدام "imperial" إذا كنت تفضل ذلك
+            });
+            view.ui.add(scaleBar, "bottom-left"); // إضافة مقياس الرسم في الزاوية السفلى اليسرى
+
+            // إضافة اتجاه الشمال
+            var compass = new Compass({
+                view: view
+            });
+            view.ui.add(compass, "top-left"); // إضافة اتجاه الشمال في الزاوية العليا اليسرى
+        });
+    </script>
+</body>
+</html>
